@@ -194,48 +194,78 @@
                 });
             };
 
+            const [showEstrategiaForm, setShowEstrategiaForm] = useState(false);
+            const [estrategiaTitulo, setEstrategiaTitulo] = useState('');
+            const [estrategiaDescripcion, setEstrategiaDescripcion] = useState('');
+
             const agregarEstrategia = () => {
                 if (!isAuthenticated) {
                     alert('⚠️ Debes iniciar sesión para agregar estrategias');
                     return;
                 }
+                setShowEstrategiaForm(true);
+            };
 
-                const titulo = prompt('Título de la estrategia:');
-                if (!titulo) return;
-                
-                const descripcion = prompt('Descripción:');
-                if (!descripcion) return;
+            const guardarEstrategia = () => {
+                if (!estrategiaTitulo.trim() || !estrategiaDescripcion.trim()) {
+                    alert('⚠️ Completa todos los campos');
+                    return;
+                }
 
                 const newEstrategia = {
                     id: Date.now(),
-                    titulo,
-                    descripcion,
+                    titulo: estrategiaTitulo,
+                    descripcion: estrategiaDescripcion,
                     fecha: new Date().toLocaleDateString()
                 };
                 
                 saveEstrategias([...estrategias, newEstrategia]);
+                setEstrategiaTitulo('');
+                setEstrategiaDescripcion('');
+                setShowEstrategiaForm(false);
             };
+
+            const cancelarEstrategia = () => {
+                setEstrategiaTitulo('');
+                setEstrategiaDescripcion('');
+                setShowEstrategiaForm(false);
+            };
+
+            const [showNoticiaForm, setShowNoticiaForm] = useState(false);
+            const [noticiaTitulo, setNoticiaTitulo] = useState('');
+            const [noticiaContenido, setNoticiaContenido] = useState('');
 
             const agregarNoticia = () => {
                 if (!isAuthenticated) {
                     alert('⚠️ Debes iniciar sesión para agregar noticias');
                     return;
                 }
+                setShowNoticiaForm(true);
+            };
 
-                const titulo = prompt('Título de la noticia:');
-                if (!titulo) return;
-                
-                const contenido = prompt('Contenido:');
-                if (!contenido) return;
+            const guardarNoticia = () => {
+                if (!noticiaTitulo.trim() || !noticiaContenido.trim()) {
+                    alert('⚠️ Completa todos los campos');
+                    return;
+                }
 
                 const newNoticia = {
                     id: Date.now(),
-                    titulo,
-                    contenido,
+                    titulo: noticiaTitulo,
+                    contenido: noticiaContenido,
                     fecha: new Date().toLocaleDateString()
                 };
                 
                 saveNoticias([...noticias, newNoticia]);
+                setNoticiaTitulo('');
+                setNoticiaContenido('');
+                setShowNoticiaForm(false);
+            };
+
+            const cancelarNoticia = () => {
+                setNoticiaTitulo('');
+                setNoticiaContenido('');
+                setShowNoticiaForm(false);
             };
 
             const eliminar = (id, type) => {
@@ -326,6 +356,97 @@
                                         className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all font-bold"
                                     >
                                         Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showEstrategiaForm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                            <div className="bg-gradient-to-br from-purple-900 to-indigo-900 p-8 rounded-2xl border-2 border-purple-400 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                                <h3 className="text-3xl font-bold text-white mb-6 text-center">📋 Nueva Estrategia</h3>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-purple-300 mb-2 font-bold">Título de la estrategia:</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: Táctica Oficial - Presión Organizada"
+                                        value={estrategiaTitulo}
+                                        onChange={(e) => setEstrategiaTitulo(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-purple-300 border border-purple-400 focus:outline-none focus:border-purple-300 text-lg"
+                                    />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-purple-300 mb-2 font-bold">Descripción detallada:</label>
+                                    <textarea
+                                        placeholder="Escribe aquí toda la estrategia... Puedes usar emojis ⚽ 🏃 ⚠️ y saltos de línea para organizar mejor el contenido."
+                                        value={estrategiaDescripcion}
+                                        onChange={(e) => setEstrategiaDescripcion(e.target.value)}
+                                        rows="15"
+                                        className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-purple-300 border border-purple-400 focus:outline-none focus:border-purple-300 text-base resize-none"
+                                    />
+                                    <p className="text-purple-400 text-sm mt-2">💡 Tip: Usa emojis y saltos de línea para organizar mejor tu estrategia</p>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={guardarEstrategia}
+                                        className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-500/50 transition-all font-bold text-lg"
+                                    >
+                                        ✅ Guardar Estrategia
+                                    </button>
+                                    <button
+                                        onClick={cancelarEstrategia}
+                                        className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all font-bold text-lg"
+                                    >
+                                        ❌ Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showNoticiaForm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                            <div className="bg-gradient-to-br from-purple-900 to-indigo-900 p-8 rounded-2xl border-2 border-purple-400 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                                <h3 className="text-3xl font-bold text-white mb-6 text-center">📰 Nueva Noticia</h3>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-purple-300 mb-2 font-bold">Título de la noticia:</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: ¡Victoria 3-1 contra los Cometas!"
+                                        value={noticiaTitulo}
+                                        onChange={(e) => setNoticiaTitulo(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-purple-300 border border-purple-400 focus:outline-none focus:border-purple-300 text-lg"
+                                    />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-purple-300 mb-2 font-bold">Contenido de la noticia:</label>
+                                    <textarea
+                                        placeholder="Escribe aquí toda la noticia... Puedes usar emojis ⚽ 🏆 🎉 y saltos de línea."
+                                        value={noticiaContenido}
+                                        onChange={(e) => setNoticiaContenido(e.target.value)}
+                                        rows="12"
+                                        className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-purple-300 border border-purple-400 focus:outline-none focus:border-purple-300 text-base resize-none"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={guardarNoticia}
+                                        className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-500/50 transition-all font-bold text-lg"
+                                    >
+                                        ✅ Publicar Noticia
+                                    </button>
+                                    <button
+                                        onClick={cancelarNoticia}
+                                        className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all font-bold text-lg"
+                                    >
+                                        ❌ Cancelar
                                     </button>
                                 </div>
                             </div>
@@ -434,7 +555,7 @@
                                                         </button>
                                                     )}
                                                     <h3 className="text-xl font-bold text-purple-300 mb-2">{est.titulo}</h3>
-                                                    <p className="text-gray-300 mb-2">{est.descripcion}</p>
+                                                    <p className="text-gray-300 mb-2 whitespace-pre-wrap">{est.descripcion}</p>
                                                     <p className="text-sm text-purple-400">Fecha: {est.fecha}</p>
                                                 </div>
                                             ))}
@@ -517,7 +638,7 @@
                                                         </button>
                                                     )}
                                                     <h3 className="text-xl font-bold text-purple-300 mb-2">{noticia.titulo}</h3>
-                                                    <p className="text-gray-300 mb-2">{noticia.contenido}</p>
+                                                    <p className="text-gray-300 mb-2 whitespace-pre-wrap">{noticia.contenido}</p>
                                                     <p className="text-sm text-purple-400">Fecha: {noticia.fecha}</p>
                                                 </div>
                                             ))}
