@@ -84,64 +84,70 @@
                 loadData();
             }, []);
 
-            const loadData = async () => {
+            const loadData = () => {
                 setLoading(true);
                 try {
-                    const estrategiasResult = await window.storage.get('astral_estrategias');
-                    if (estrategiasResult) {
-                        setEstrategias(JSON.parse(estrategiasResult.value));
+                    const estrategiasData = localStorage.getItem('astral_estrategias');
+                    if (estrategiasData) {
+                        setEstrategias(JSON.parse(estrategiasData));
                     }
 
-                    const fotosResult = await window.storage.get('astral_fotos');
-                    if (fotosResult) {
-                        setFotos(JSON.parse(fotosResult.value));
+                    const fotosData = localStorage.getItem('astral_fotos');
+                    if (fotosData) {
+                        setFotos(JSON.parse(fotosData));
                     }
 
-                    const noticiasResult = await window.storage.get('astral_noticias');
-                    if (noticiasResult) {
-                        setNoticias(JSON.parse(noticiasResult.value));
+                    const noticiasData = localStorage.getItem('astral_noticias');
+                    if (noticiasData) {
+                        setNoticias(JSON.parse(noticiasData));
                     }
                 } catch (error) {
-                    console.log('Iniciando con datos vacíos');
+                    console.log('Error cargando datos:', error);
                 }
                 setLoading(false);
             };
 
-            const saveEstrategias = async (newEstrategias) => {
+            const saveEstrategias = (newEstrategias) => {
                 try {
-                    await window.storage.set('astral_estrategias', JSON.stringify(newEstrategias));
+                    localStorage.setItem('astral_estrategias', JSON.stringify(newEstrategias));
                     setEstrategias(newEstrategias);
+                    alert('✅ Estrategia guardada exitosamente');
                 } catch (error) {
-                    alert('Error al guardar. Intenta de nuevo.');
+                    console.error('Error:', error);
+                    alert('❌ Error al guardar. Intenta de nuevo.');
                 }
             };
 
-            const saveFotos = async (newFotos) => {
+            const saveFotos = (newFotos) => {
                 try {
-                    await window.storage.set('astral_fotos', JSON.stringify(newFotos));
+                    localStorage.setItem('astral_fotos', JSON.stringify(newFotos));
                     setFotos(newFotos);
                 } catch (error) {
-                    alert('Error al guardar. Intenta de nuevo.');
+                    console.error('Error:', error);
+                    alert('❌ Error al guardar foto. El archivo puede ser muy grande.');
                 }
             };
 
-            const saveNoticias = async (newNoticias) => {
+            const saveNoticias = (newNoticias) => {
                 try {
-                    await window.storage.set('astral_noticias', JSON.stringify(newNoticias));
+                    localStorage.setItem('astral_noticias', JSON.stringify(newNoticias));
                     setNoticias(newNoticias);
+                    alert('✅ Noticia guardada exitosamente');
                 } catch (error) {
-                    alert('Error al guardar. Intenta de nuevo.');
+                    console.error('Error:', error);
+                    alert('❌ Error al guardar. Intenta de nuevo.');
                 }
             };
 
-            const handleLogin = async () => {
+            const handleLogin = () => {
                 if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === 'AstralFC2026') {
                     setIsAuthenticated(true);
                     setShowLogin(false);
                     setEmail('');
                     setPassword('');
+                    alert('✅ Sesión iniciada correctamente');
                 } else {
-                    alert('Email o contraseña incorrectos');
+                    alert('❌ Email o contraseña incorrectos');
                 }
             };
 
@@ -149,17 +155,25 @@
                 setIsAuthenticated(false);
                 setEmail('');
                 setPassword('');
+                alert('Sesión cerrada');
             };
 
             const handleFileUpload = (e) => {
                 if (!isAuthenticated) {
-                    alert('Debes iniciar sesión para subir fotos');
+                    alert('⚠️ Debes iniciar sesión para subir fotos');
                     return;
                 }
 
                 const files = Array.from(e.target.files);
+                let processed = 0;
                 
                 files.forEach(file => {
+                    // Limitar tamaño de imagen a 2MB
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert(`⚠️ La imagen ${file.name} es muy grande. Máximo 2MB por foto.`);
+                        return;
+                    }
+
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         const newFoto = {
@@ -170,6 +184,11 @@
                         };
                         const updatedFotos = [...fotos, newFoto];
                         saveFotos(updatedFotos);
+                        processed++;
+                        
+                        if (processed === files.length) {
+                            alert(`✅ ${processed} foto(s) subida(s) exitosamente`);
+                        }
                     };
                     reader.readAsDataURL(file);
                 });
@@ -177,7 +196,7 @@
 
             const agregarEstrategia = () => {
                 if (!isAuthenticated) {
-                    alert('Debes iniciar sesión para agregar estrategias');
+                    alert('⚠️ Debes iniciar sesión para agregar estrategias');
                     return;
                 }
 
@@ -199,7 +218,7 @@
 
             const agregarNoticia = () => {
                 if (!isAuthenticated) {
-                    alert('Debes iniciar sesión para agregar noticias');
+                    alert('⚠️ Debes iniciar sesión para agregar noticias');
                     return;
                 }
 
@@ -221,28 +240,37 @@
 
             const eliminar = (id, type) => {
                 if (!isAuthenticated) {
-                    alert('Debes iniciar sesión para eliminar contenido');
+                    alert('⚠️ Debes iniciar sesión para eliminar contenido');
                     return;
                 }
 
+                const confirmar = confirm('¿Estás seguro de eliminar este elemento?');
+                if (!confirmar) return;
+
                 if (type === 'foto') {
                     const updated = fotos.filter(f => f.id !== id);
-                    saveFotos(updated);
+                    localStorage.setItem('astral_fotos', JSON.stringify(updated));
+                    setFotos(updated);
+                    alert('✅ Foto eliminada');
                 }
                 if (type === 'estrategia') {
                     const updated = estrategias.filter(e => e.id !== id);
-                    saveEstrategias(updated);
+                    localStorage.setItem('astral_estrategias', JSON.stringify(updated));
+                    setEstrategias(updated);
+                    alert('✅ Estrategia eliminada');
                 }
                 if (type === 'noticia') {
                     const updated = noticias.filter(n => n.id !== id);
-                    saveNoticias(updated);
+                    localStorage.setItem('astral_noticias', JSON.stringify(updated));
+                    setNoticias(updated);
+                    alert('✅ Noticia eliminada');
                 }
             };
 
             if (loading) {
                 return (
                     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-950 via-purple-900 to-black">
-                        <div className="text-white text-2xl">Cargando Astral FC...</div>
+                        <div className="text-white text-2xl">⭐ Cargando Astral FC...</div>
                     </div>
                 );
             }
@@ -270,7 +298,7 @@
                     {showLogin && (
                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
                             <div className="bg-gradient-to-br from-purple-900 to-indigo-900 p-8 rounded-2xl border-2 border-purple-400 max-w-md w-full mx-4">
-                                <h3 className="text-2xl font-bold text-white mb-6 text-center">Acceso Administrador</h3>
+                                <h3 className="text-2xl font-bold text-white mb-6 text-center">🔐 Acceso Administrador</h3>
                                 <input
                                     type="email"
                                     placeholder="Email"
@@ -426,7 +454,7 @@
                                         {isAuthenticated && (
                                             <label className="mb-6 inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all cursor-pointer">
                                                 <Upload />
-                                                Subir Fotos
+                                                Subir Fotos (máx 2MB cada una)
                                                 <input
                                                     type="file"
                                                     multiple
